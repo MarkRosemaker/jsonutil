@@ -9,6 +9,7 @@ import (
 
 	"github.com/MarkRosemaker/jsonutil"
 	"github.com/go-json-experiment/json"
+	"github.com/go-json-experiment/json/jsontext"
 )
 
 func TestURL(t *testing.T) {
@@ -24,25 +25,42 @@ func TestURL(t *testing.T) {
 		json.WithUnmarshalers(json.UnmarshalFuncV2(jsonutil.URLUnmarshal)),
 	)
 
-	t.Run("errors", func(t *testing.T) {
-		tpURL := reflect.TypeOf(&url.URL{})
+	t.Run("EOF", func(t *testing.T) {
+		out := &testURL{}
+		errSyn := &jsontext.SyntacticError{}
 
-		for _, data := range []string{
-			`{"url":`,                       // EOF
-			`{"url":3}`,                     // not a string
-			`{"url":" http://example.org"}`, // parse error
-		} {
-			t.Run(data, func(t *testing.T) {
-				out := &testURL{}
-				errSem := &json.SemanticError{}
-				if err := json.Unmarshal([]byte(data), out, jsonOpts); err == nil {
-					t.Fatalf("expected error")
-				} else if !errors.As(err, &errSem) {
-					t.Fatalf("expected error to be a semantic error, got: %v", err)
-				} else if errSem.GoType != tpURL {
-					t.Fatalf("expected semantic error to have type %s, got: %s", tpURL, errSem.GoType)
-				}
-			})
+		if err := json.Unmarshal([]byte(`{"url":`), out, jsonOpts); err == nil {
+			t.Fatalf("expected error")
+		} else if !errors.As(err, &errSyn) {
+			t.Fatalf("expected error to be a semantic error, got: %v", err)
+		} else if want := `unexpected EOF`; errSyn.Err.Error() != want {
+			t.Fatalf("expected syntactic error be %s, got: %#v", want, errSyn.Err)
+		}
+	})
+
+	t.Run("not a string", func(t *testing.T) {
+		out := &testURL{}
+		errSem := &json.SemanticError{}
+
+		if err := json.Unmarshal([]byte(`{"url":3}`), out, jsonOpts); err == nil {
+			t.Fatalf("expected error")
+		} else if !errors.As(err, &errSem) {
+			t.Fatalf("expected error to be a semantic error, got: %v", err)
+		} else if tpInt := reflect.TypeFor[*url.URL](); errSem.GoType != tpInt {
+			t.Fatalf("expected semantic error to have type %s, got: %s", tpInt, errSem.GoType)
+		}
+	})
+
+	t.Run("parse error", func(t *testing.T) {
+		out := &testURL{}
+		errSem := &json.SemanticError{}
+
+		if err := json.Unmarshal([]byte(`{"url":" http://example.org"}`), out, jsonOpts); err == nil {
+			t.Fatalf("expected error")
+		} else if !errors.As(err, &errSem) {
+			t.Fatalf("expected error to be a semantic error, got: %v", err)
+		} else if tpInt := reflect.TypeFor[*url.URL](); errSem.GoType != tpInt {
+			t.Fatalf("expected semantic error to have type %s, got: %s", tpInt, errSem.GoType)
 		}
 	})
 

@@ -9,6 +9,7 @@ import (
 
 	"github.com/MarkRosemaker/jsonutil"
 	"github.com/go-json-experiment/json"
+	"github.com/go-json-experiment/json/jsontext"
 )
 
 func TestDuration(t *testing.T) {
@@ -24,24 +25,29 @@ func TestDuration(t *testing.T) {
 		json.WithUnmarshalers(json.UnmarshalFuncV2(jsonutil.DurationUnmarshalIntSeconds)),
 	)
 
-	t.Run("errors", func(t *testing.T) {
-		tpDuration := reflect.PointerTo(reflect.TypeFor[time.Duration]())
+	t.Run("EOF", func(t *testing.T) {
+		out := &testDuration{}
+		errSyn := &jsontext.SyntacticError{}
 
-		for _, data := range []string{
-			`{"duration":`,      // EOF
-			`{"duration": "3"}`, // not an int
-		} {
-			t.Run(data, func(t *testing.T) {
-				out := &testDuration{}
-				errSem := &json.SemanticError{}
-				if err := json.Unmarshal([]byte(data), out, jsonOpts); err == nil {
-					t.Fatalf("expected error")
-				} else if !errors.As(err, &errSem) {
-					t.Fatalf("expected error to be a semantic error, got: %v", err)
-				} else if errSem.GoType != tpDuration {
-					t.Fatalf("expected semantic error to have type %s, got: %s", tpDuration, errSem.GoType)
-				}
-			})
+		if err := json.Unmarshal([]byte(`{"duration":`), out, jsonOpts); err == nil {
+			t.Fatalf("expected error")
+		} else if !errors.As(err, &errSyn) {
+			t.Fatalf("expected error to be a semantic error, got: %v", err)
+		} else if want := `unexpected EOF`; errSyn.Err.Error() != want {
+			t.Fatalf("expected syntactic error be %s, got: %#v", want, errSyn.Err)
+		}
+	})
+
+	t.Run("not an int", func(t *testing.T) {
+		out := &testDuration{}
+		errSem := &json.SemanticError{}
+
+		if err := json.Unmarshal([]byte(`{"duration": "3"}`), out, jsonOpts); err == nil {
+			t.Fatalf("expected error")
+		} else if !errors.As(err, &errSem) {
+			t.Fatalf("expected error to be a semantic error, got: %v", err)
+		} else if tpInt := reflect.TypeFor[int64](); errSem.GoType != tpInt {
+			t.Fatalf("expected semantic error to have type %s, got: %s", tpInt, errSem.GoType)
 		}
 	})
 
