@@ -4,7 +4,9 @@
 ![Code Coverage](https://img.shields.io/badge/coverage-100%25-brightgreen)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](./LICENSE)
 
-`jsonutil` is a Go package that provides custom JSON marshaling and unmarshaling functions for specific data types. This package is particularly useful when you need to handle JSON encoding and decoding for types like `time.Duration` and `url.URL` in a customized manner.
+`jsonutil` is a Go package that provides custom [JSON v2](https://github.com/go-json-experiment/json) marshaling and unmarshaling functions for specific data types.
+
+This package is particularly useful when you need to handle JSON encoding and decoding for types like `time.Duration` and `url.URL` in a customized manner.
 
 ## Features
 
