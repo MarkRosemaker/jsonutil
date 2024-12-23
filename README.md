@@ -3,6 +3,9 @@
 [![Go Report Card](https://goreportcard.com/badge/github.com/MarkRosemaker/jsonutil)](https://goreportcard.com/report/github.com/MarkRosemaker/jsonutil)
 ![Code Coverage](https://img.shields.io/badge/coverage-100%25-brightgreen)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](./LICENSE)
+<p align="center">
+  <img alt="jsonutil logo: cute golang gopher in JSON brackets with gear in the background and text saying v2" src=logo.jpg width=300>
+</p>
 
 `jsonutil` is a Go package that provides custom [JSON v2](https://github.com/go-json-experiment/json) marshaling and unmarshaling functions for specific data types.
 
