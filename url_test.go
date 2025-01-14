@@ -21,8 +21,8 @@ func TestURL(t *testing.T) {
 	}
 
 	jsonOpts := json.JoinOptions(
-		json.WithMarshalers(json.MarshalFuncV2(jsonutil.URLMarshal)),
-		json.WithUnmarshalers(json.UnmarshalFuncV2(jsonutil.URLUnmarshal)),
+		json.WithMarshalers(json.MarshalToFunc(jsonutil.URLMarshal)),
+		json.WithUnmarshalers(json.UnmarshalFromFunc(jsonutil.URLUnmarshal)),
 	)
 
 	t.Run("EOF", func(t *testing.T) {

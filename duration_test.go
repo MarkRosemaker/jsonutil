@@ -21,8 +21,8 @@ func TestDuration(t *testing.T) {
 	}
 
 	jsonOpts := json.JoinOptions(
-		json.WithMarshalers(json.MarshalFuncV2(jsonutil.DurationMarshalIntSeconds)),
-		json.WithUnmarshalers(json.UnmarshalFuncV2(jsonutil.DurationUnmarshalIntSeconds)),
+		json.WithMarshalers(json.MarshalToFunc(jsonutil.DurationMarshalIntSeconds)),
+		json.WithUnmarshalers(json.UnmarshalFromFunc(jsonutil.DurationUnmarshalIntSeconds)),
 	)
 
 	t.Run("EOF", func(t *testing.T) {
