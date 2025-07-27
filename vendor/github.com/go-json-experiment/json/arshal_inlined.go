@@ -35,9 +35,9 @@ var jsontextValueType = reflect.TypeFor[jsontext.Value]()
 
 // marshalInlinedFallbackAll marshals all the members in an inlined fallback.
 func marshalInlinedFallbackAll(enc *jsontext.Encoder, va addressableValue, mo *jsonopts.Struct, f *structField, insertUnquotedName func([]byte) bool) error {
-	v := addressableValue{va.Field(f.index[0]), va.forcedAddr} // addressable if struct value is addressable
-	if len(f.index) > 1 {
-		v = v.fieldByIndex(f.index[1:], false)
+	v := addressableValue{va.Field(f.index0), va.forcedAddr} // addressable if struct value is addressable
+	if len(f.index) > 0 {
+		v = v.fieldByIndex(f.index, false)
 		if !v.IsValid() {
 			return nil // implies a nil inlined field
 		}
@@ -111,7 +111,7 @@ func marshalInlinedFallbackAll(enc *jsontext.Encoder, va addressableValue, mo *j
 		mk := newAddressableValue(m.Type().Key())
 		mv := newAddressableValue(m.Type().Elem())
 		marshalKey := func(mk addressableValue) error {
-			b, err := jsonwire.AppendQuote(enc.UnusedBuffer(), mk.String(), &mo.Flags)
+			b, err := jsonwire.AppendQuote(enc.AvailableBuffer(), mk.String(), &mo.Flags)
 			if err != nil {
 				return newMarshalErrorBefore(enc, m.Type().Key(), err)
 			}
@@ -165,9 +165,9 @@ func marshalInlinedFallbackAll(enc *jsontext.Encoder, va addressableValue, mo *j
 
 // unmarshalInlinedFallbackNext unmarshals only the next member in an inlined fallback.
 func unmarshalInlinedFallbackNext(dec *jsontext.Decoder, va addressableValue, uo *jsonopts.Struct, f *structField, quotedName, unquotedName []byte) error {
-	v := addressableValue{va.Field(f.index[0]), va.forcedAddr} // addressable if struct value is addressable
-	if len(f.index) > 1 {
-		v = v.fieldByIndex(f.index[1:], true)
+	v := addressableValue{va.Field(f.index0), va.forcedAddr} // addressable if struct value is addressable
+	if len(f.index) > 0 {
+		v = v.fieldByIndex(f.index, true)
 	}
 	v = v.indirect(true)
 
