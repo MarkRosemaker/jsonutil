@@ -1,6 +1,8 @@
 package jsonutil_test
 
 import (
+	"encoding/json/jsontext"
+	"encoding/json/v2"
 	"errors"
 	"net/url"
 	"reflect"
@@ -8,8 +10,6 @@ import (
 	"testing"
 
 	"github.com/MarkRosemaker/jsonutil"
-	"github.com/go-json-experiment/json"
-	"github.com/go-json-experiment/json/jsontext"
 )
 
 func TestURL(t *testing.T) {

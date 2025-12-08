@@ -1,10 +1,9 @@
 package jsonutil
 
 import (
+	"encoding/json/jsontext"
+	"encoding/json/v2"
 	"time"
-
-	"github.com/go-json-experiment/json"
-	"github.com/go-json-experiment/json/jsontext"
 )
 
 // DurationMarshalIntSeconds is a custom marshaler for time.Duration, marshaling them as integers representing seconds.

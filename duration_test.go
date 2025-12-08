@@ -1,6 +1,8 @@
 package jsonutil_test
 
 import (
+	"encoding/json/jsontext"
+	"encoding/json/v2"
 	"errors"
 	"reflect"
 	"strconv"
@@ -8,8 +10,6 @@ import (
 	"time"
 
 	"github.com/MarkRosemaker/jsonutil"
-	"github.com/go-json-experiment/json"
-	"github.com/go-json-experiment/json/jsontext"
 )
 
 func TestDuration(t *testing.T) {

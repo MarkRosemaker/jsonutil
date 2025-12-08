@@ -1,10 +1,9 @@
 package jsonutil
 
 import (
+	"encoding/json/jsontext"
 	"fmt"
 	"net/url"
-
-	"github.com/go-json-experiment/json/jsontext"
 )
 
 // URLMarshal is a custom marshaler for URL values, marshaling them as strings.
