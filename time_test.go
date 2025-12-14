@@ -66,7 +66,7 @@ func TestUnixTime(t *testing.T) {
 		in  testTime
 		out string
 	}{
-		{testTime{}, `{"time":-62135596800,"timePointer":null}`},
+		{testTime{}, `{"time":0,"timePointer":null}`},
 		{
 			testTime{Time: now, TimePointer: &now, TimeOmitZero: now, TimePointerOmitEmpty: &now},
 			fmt.Sprintf(`{"time":%[1]d,"timePointer":%[1]d,"timeOmitZero":%[1]d,"timePointerOmitEmpty":%[1]d}`, nowUnix),

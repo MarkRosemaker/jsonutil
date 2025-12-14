@@ -8,6 +8,10 @@ import (
 
 // TimeMarshalIntUnix is a custom marshaler for time.Time, marshaling them as integers representing unix time.
 func TimeMarshalIntUnix(enc *jsontext.Encoder, t time.Time) error {
+	if t.IsZero() {
+		return enc.WriteToken(jsontext.Int(0))
+	}
+
 	return enc.WriteToken(jsontext.Int(int64(t.Unix())))
 }
 
@@ -18,7 +22,11 @@ func TimeUnmarshalIntUnix(dec *jsontext.Decoder, d *time.Time) error {
 		return err
 	}
 
-	*d = time.Unix(seconds, 0)
+	if seconds == 0 {
+		*d = time.Time{}
+	} else {
+		*d = time.Unix(seconds, 0)
+	}
 
 	return nil
 }
