@@ -16,7 +16,7 @@ func TestURL(t *testing.T) {
 	type testURL struct {
 		URL                 url.URL  `json:"url"`
 		URLPointer          *url.URL `json:"urlPointer"`
-		URLOmitZero        url.URL  `json:"urlOmitZero,omitzero"`
+		URLOmitZero         url.URL  `json:"urlOmitZero,omitzero"`
 		URLPointerOmitEmpty *url.URL `json:"urlPointerOmitEmpty,omitempty"`
 	}
 
