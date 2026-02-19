@@ -16,7 +16,7 @@ func TestURL(t *testing.T) {
 	type testURL struct {
 		URL                 url.URL  `json:"url"`
 		URLPointer          *url.URL `json:"urlPointer"`
-		URLOmitEmpty        url.URL  `json:"urlOmitEmpty,omitempty"`
+		URLOmitZero        url.URL  `json:"urlOmitZero,omitzero"`
 		URLPointerOmitEmpty *url.URL `json:"urlPointerOmitEmpty,omitempty"`
 	}
 
@@ -66,7 +66,7 @@ func TestURL(t *testing.T) {
 
 	t.Run("null", func(t *testing.T) {
 		out := &testURL{}
-		if err := json.Unmarshal([]byte(`{"url":null,"urlPointer":null,"urlOmitEmpty":null,"urlPointerOmitEmpty":null}`), out, jsonOpts); err != nil {
+		if err := json.Unmarshal([]byte(`{"url":null,"urlPointer":null,"urlOmitZero":null,"urlPointerOmitEmpty":null}`), out, jsonOpts); err != nil {
 			t.Errorf("unexpected error: %v", err)
 		}
 	})
@@ -83,8 +83,8 @@ func TestURL(t *testing.T) {
 	}{
 		{testURL{}, `{"url":"","urlPointer":null}`},
 		{
-			testURL{URL: u, URLPointer: &u, URLOmitEmpty: u, URLPointerOmitEmpty: &u},
-			`{"url":"https://example.com/path","urlPointer":"https://example.com/path","urlOmitEmpty":"https://example.com/path","urlPointerOmitEmpty":"https://example.com/path"}`,
+			testURL{URL: u, URLPointer: &u, URLOmitZero: u, URLPointerOmitEmpty: &u},
+			`{"url":"https://example.com/path","urlPointer":"https://example.com/path","urlOmitZero":"https://example.com/path","urlPointerOmitEmpty":"https://example.com/path"}`,
 		},
 	} {
 		t.Run(strconv.Itoa(i), func(t *testing.T) {
@@ -106,7 +106,7 @@ func TestURL(t *testing.T) {
 				t.Fatalf("want: %s, got: %s", want, got)
 			}
 
-			if got, want := out.URLOmitEmpty.String(), tc.in.URLOmitEmpty.String(); got != want {
+			if got, want := out.URLOmitZero.String(), tc.in.URLOmitZero.String(); got != want {
 				t.Fatalf("want: %s, got: %s", want, got)
 			}
 
