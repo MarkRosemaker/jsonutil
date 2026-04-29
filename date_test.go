@@ -60,9 +60,9 @@ func TestUnixDate(t *testing.T) {
 		}
 	})
 
-	now := time.Now()
+	now := time.Now().UTC().Truncate(time.Hour * 24)
 	today := civil.DateOf(now)
-	todayUnix := now.Truncate(time.Hour * 24).Unix()
+	todayUnix := now.Unix()
 
 	for i, tc := range []struct {
 		in  testDate
