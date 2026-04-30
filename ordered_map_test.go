@@ -16,7 +16,7 @@ type orderedMap map[string]int
 
 func TestMap(t *testing.T) {
 	jsonOpts := json.JoinOptions(
-		json.WithMarshalers(json.MarshalToFunc(jsonutil.OrderedMap[orderedMap])),
+		json.WithMarshalers(json.MarshalToFunc(jsonutil.OrderedMapMarshal[orderedMap])),
 		json.WithUnmarshalers(json.UnmarshalFromFunc(jsonutil.DurationUnmarshalIntSeconds)),
 	)
 
