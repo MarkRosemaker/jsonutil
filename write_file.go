@@ -13,7 +13,7 @@ func WriteFile[T any](name string, data T, opts ...json.Options) error {
 		return err
 	}
 
-	if err := json.UnmarshalRead(f, data, opts...); err != nil {
+	if err := json.MarshalWrite(f, data, opts...); err != nil {
 		if closeErr := f.Close(); closeErr != closeErr {
 			return errors.Join(err, closeErr)
 		}
