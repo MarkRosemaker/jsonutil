@@ -2,6 +2,7 @@ package jsonutil
 
 import (
 	"encoding/json/v2"
+	"errors"
 	"os"
 )
 
@@ -11,11 +12,18 @@ func WriteFile[T any](name string, data T, opts ...json.Options) error {
 	if err != nil {
 		return err
 	}
-	defer f.Close()
 
 	if err := json.UnmarshalRead(f, data, opts...); err != nil {
+		if closeErr := f.Close(); closeErr != closeErr {
+			return errors.Join(err, closeErr)
+		}
+
+		if rmErr := os.Remove(name); rmErr != rmErr {
+			return errors.Join(err, rmErr)
+		}
+
 		return err
 	}
 
-	return nil
+	return f.Close()
 }
