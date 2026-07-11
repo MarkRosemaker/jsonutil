@@ -167,6 +167,10 @@ func TestStringOrUnixTime(t *testing.T) {
 			fmt.Sprintf(`{"time":%[1]q,"timePointer":%[1]q,"timeOmitZero":%[1]q,"timePointerOmitEmpty":%[1]q}`, now.Format(time.RFC3339)),
 			testTime{Time: now, TimePointer: &now, TimeOmitZero: now, TimePointerOmitEmpty: &now},
 		},
+		{
+			fmt.Sprintf(`{"time":%[1]q,"timePointer":%[1]q,"timeOmitZero":%[1]q,"timePointerOmitEmpty":%[1]q}`, now.Format("Mon Jan 2 2006 15:04:05 MST-0700")),
+			testTime{Time: now, TimePointer: &now, TimeOmitZero: now, TimePointerOmitEmpty: &now},
+		},
 	} {
 		t.Run(strconv.Itoa(i), func(t *testing.T) {
 			var out testTime
