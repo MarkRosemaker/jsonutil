@@ -22,3 +22,23 @@ func DurationUnmarshalIntSeconds(dec *jsontext.Decoder, d *time.Duration) error 
 
 	return nil
 }
+
+func DurationMarshalString(enc *jsontext.Encoder, d time.Duration) error {
+	return enc.WriteToken(jsontext.String(d.String()))
+}
+
+func DurationUnmarshalString(dec *jsontext.Decoder, d *time.Duration) error {
+	var s string
+	if err := json.UnmarshalDecode(dec, s); err != nil {
+		return err
+	}
+
+	parsed, err := time.ParseDuration(s)
+	if err != nil {
+		return err
+	}
+
+	*d = parsed
+
+	return nil
+}
