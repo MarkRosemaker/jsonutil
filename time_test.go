@@ -114,8 +114,12 @@ func TestUnixTime(t *testing.T) {
 }
 
 func TestStringOrUnixTime(t *testing.T) {
+	const altLayout = "Mon Jan 2 2006 15:04:05 MST-0700"
+
 	jsonOpts := json.JoinOptions(
-		json.WithUnmarshalers(json.UnmarshalFromFunc(jsonutil.TimeUnmarshalStringOrIntUnix)),
+		json.WithUnmarshalers(json.UnmarshalFromFunc(
+			jsonutil.TimeUnmarshalStringOrIntUnix([]string{time.RFC3339, altLayout}),
+		)),
 	)
 
 	t.Run("EOF", func(t *testing.T) {
@@ -168,7 +172,7 @@ func TestStringOrUnixTime(t *testing.T) {
 			testTime{Time: now, TimePointer: &now, TimeOmitZero: now, TimePointerOmitEmpty: &now},
 		},
 		{
-			fmt.Sprintf(`{"time":%[1]q,"timePointer":%[1]q,"timeOmitZero":%[1]q,"timePointerOmitEmpty":%[1]q}`, now.Format("Mon Jan 2 2006 15:04:05 MST-0700")),
+			fmt.Sprintf(`{"time":%[1]q,"timePointer":%[1]q,"timeOmitZero":%[1]q,"timePointerOmitEmpty":%[1]q}`, now.Format(altLayout)),
 			testTime{Time: now, TimePointer: &now, TimeOmitZero: now, TimePointerOmitEmpty: &now},
 		},
 	} {
@@ -202,4 +206,11 @@ func TestStringOrUnixTime(t *testing.T) {
 			}
 		})
 	}
+
+	t.Run("no layout matches", func(t *testing.T) {
+		out := &testTime{}
+		if err := json.Unmarshal([]byte(`{"time":"not a time"}`), out, jsonOpts); err == nil {
+			t.Fatalf("expected error")
+		}
+	})
 }
