@@ -41,5 +41,4 @@ func TestTimeUnmarshalStringOrIntUnixLayouts(t *testing.T) {
 			t.Fatalf("want zero time, got: %s", out)
 		}
 	})
-
 }
