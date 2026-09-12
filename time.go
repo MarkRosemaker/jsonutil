@@ -33,10 +33,19 @@ func TimeUnmarshalIntUnix(dec *jsontext.Decoder, d *time.Time) error {
 	return nil
 }
 
-// TimeUnmarshalStringOrIntUnix returns a custom unmarshaler for time.Time that unmarshals
+// timeAltLayout is a fallback layout for time strings that don't conform to RFC3339.
+const timeAltLayout = "Mon Jan 2 2006 15:04:05 MST-0700"
+
+// TimeUnmarshalStringOrIntUnix unmarshals a time.Time from either an RFC3339 or
+// timeAltLayout string, or an integer representing unix seconds. Nulls decode as the zero time.
+func TimeUnmarshalStringOrIntUnix(dec *jsontext.Decoder, d *time.Time) error {
+	return timeUnmarshalStringOrIntUnix([]string{time.RFC3339, timeAltLayout})(dec, d)
+}
+
+// timeUnmarshalStringOrIntUnix returns a custom unmarshaler for time.Time that unmarshals
 // from either an integer representing unix seconds or a string, tried against each of the
 // given layouts (see time.Parse) in order until one succeeds. Nulls decode as the zero time.
-func TimeUnmarshalStringOrIntUnix(layouts []string) func(dec *jsontext.Decoder, d *time.Time) error {
+func timeUnmarshalStringOrIntUnix(layouts []string) func(dec *jsontext.Decoder, d *time.Time) error {
 	return func(dec *jsontext.Decoder, d *time.Time) error {
 		tkn, err := dec.ReadToken()
 		if err != nil {

@@ -117,9 +117,7 @@ func TestStringOrUnixTime(t *testing.T) {
 	const altLayout = "Mon Jan 2 2006 15:04:05 MST-0700"
 
 	jsonOpts := json.JoinOptions(
-		json.WithUnmarshalers(json.UnmarshalFromFunc(
-			jsonutil.TimeUnmarshalStringOrIntUnix([]string{time.RFC3339, altLayout}),
-		)),
+		json.WithUnmarshalers(json.UnmarshalFromFunc(jsonutil.TimeUnmarshalStringOrIntUnix)),
 	)
 
 	t.Run("EOF", func(t *testing.T) {
