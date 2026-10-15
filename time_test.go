@@ -212,3 +212,44 @@ func TestStringOrUnixTime(t *testing.T) {
 		}
 	})
 }
+
+func TestTimeIntUnix(t *testing.T) {
+	t.Parallel()
+
+	type wrapper struct {
+		At      time.Time `json:"at"`
+		Created time.Time `json:"created"`
+		Until   time.Time `json:"until,omitzero"`
+	}
+
+	shadow := func(v *wrapper) any {
+		type plain wrapper
+
+		return &struct {
+			*plain
+			At    *jsonutil.TimeIntUnix `json:"at"`
+			Until *jsonutil.TimeIntUnix `json:"until,omitzero"`
+		}{(*plain)(v), (*jsonutil.TimeIntUnix)(&v.At), (*jsonutil.TimeIntUnix)(&v.Until)}
+	}
+
+	at := time.Unix(1759190400, 0).UTC()
+	in := wrapper{At: at, Created: at}
+
+	b, err := json.Marshal(shadow(&in))
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if want := `{"created":"2025-09-30T00:00:00Z","at":1759190400}`; string(b) != want {
+		t.Fatalf("got %s, want %s", b, want)
+	}
+
+	var out wrapper
+	if err := json.Unmarshal(b, shadow(&out)); err != nil {
+		t.Fatal(err)
+	}
+
+	if !out.At.Equal(in.At) || !out.Created.Equal(in.Created) || !out.Until.IsZero() {
+		t.Errorf("got %+v, want %+v", out, in)
+	}
+}
