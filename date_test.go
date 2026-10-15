@@ -114,3 +114,16 @@ func TestUnixDate(t *testing.T) {
 		})
 	}
 }
+
+func TestDateUnmarshalIntUnix_UTC(t *testing.T) {
+	t.Setenv("TZ", "America/Los_Angeles")
+
+	var d civil.Date
+	if err := json.Unmarshal([]byte(`1759190400`), &d, json.WithUnmarshalers(json.UnmarshalFromFunc(jsonutil.DateUnmarshalIntUnix))); err != nil {
+		t.Fatal(err)
+	}
+
+	if want := (civil.Date{Year: 2025, Month: time.September, Day: 30}); d != want {
+		t.Errorf("got %s, want %s: midnight UTC is that day wherever the reader is", d, want)
+	}
+}
