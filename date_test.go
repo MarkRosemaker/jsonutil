@@ -175,8 +175,14 @@ func TestDateBasic(t *testing.T) {
 		})
 	}
 
-	var d civil.Date
-	if err := json.Unmarshal([]byte(`"2026-03-20"`), &d, json.WithUnmarshalers(json.UnmarshalFromFunc(jsonutil.DateUnmarshalBasic))); err == nil {
-		t.Error("a date with separators: got no error")
+	for _, in := range []string{`"2026-03-20"`, `"20261320"`, `"20260230"`, `"2026032"`, `"2026032x"`, `20260320`} {
+		var d civil.Date
+		if err := json.Unmarshal([]byte(in), &d, json.WithUnmarshalers(json.UnmarshalFromFunc(jsonutil.DateUnmarshalBasic))); err == nil {
+			t.Errorf("%s: got no error, but %s", in, d)
+		}
+	}
+
+	if _, err := json.Marshal(civil.Date{Year: 12026, Month: 1, Day: 1}, json.WithMarshalers(json.MarshalToFunc(jsonutil.DateMarshalBasic))); err == nil {
+		t.Error("a year of five digits: got no error")
 	}
 }
