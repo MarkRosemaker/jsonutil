@@ -173,3 +173,85 @@ func main() {
 	// Output: {"Foo":"bar","Baz":"quux"}
 }
 ```
+
+### Numbers Sent as Strings
+
+For an API that sends a number as a string, such as `"9.5"`, but now and then as a number, unmarshal with
+`Float64UnmarshalStringOrNumber` and give the field the `string` option, so that it is marshaled as the string again:
+
+```go
+package main
+
+import (
+	"encoding/json/v2"
+	"fmt"
+
+	"github.com/MarkRosemaker/jsonutil"
+)
+
+var jsonOpts = json.WithUnmarshalers(json.UnmarshalFromFunc(jsonutil.Float64UnmarshalStringOrNumber))
+
+type Option struct {
+	Strike float64 `json:"strike,string"`
+}
+
+func main() {
+	for _, in := range []string{`{"strike":"9.5"}`, `{"strike":0.0}`} {
+		out := &Option{}
+		if err := json.Unmarshal([]byte(in), out, jsonOpts); err != nil {
+			panic(err)
+		}
+
+		fmt.Println(out.Strike)
+	}
+
+	res, err := json.Marshal(Option{Strike: 52})
+	if err != nil {
+		panic(err)
+	}
+
+	fmt.Println(string(res))
+	// Output:
+	// 9.5
+	// 0
+	// {"strike":"52"}
+}
+```
+
+### Unix Time for Some Members Only
+
+Where an API writes some dates or times as unix time and others as strings, name the members holding the former:
+
+```go
+package main
+
+import (
+	"encoding/json/v2"
+	"fmt"
+	"time"
+
+	"github.com/MarkRosemaker/jsonutil"
+)
+
+var jsonOpts = json.JoinOptions(
+	json.WithMarshalers(json.MarshalToFunc(jsonutil.TimeMarshalIntUnixFor("at"))),
+	json.WithUnmarshalers(json.UnmarshalFromFunc(jsonutil.TimeUnmarshalIntUnixFor("at"))),
+)
+
+type Event struct {
+	At      time.Time `json:"at"`
+	Created time.Time `json:"created"`
+}
+
+func main() {
+	t := time.Unix(1759190400, 0).UTC()
+
+	res, err := json.Marshal(Event{At: t, Created: t}, jsonOpts)
+	if err != nil {
+		panic(err)
+	}
+
+	fmt.Println(string(res))
+	// Output: {"at":1759190400,"created":"2025-09-30T00:00:00Z"}
+}
+```
