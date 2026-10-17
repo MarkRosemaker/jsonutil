@@ -127,3 +127,56 @@ func TestDateUnmarshalIntUnix_UTC(t *testing.T) {
 		t.Errorf("got %s, want %s: midnight UTC is that day wherever the reader is", d, want)
 	}
 }
+
+func TestDateBasic(t *testing.T) {
+	t.Parallel()
+
+	type event struct {
+		Day  civil.Date `json:"day"`
+		Next civil.Date `json:"next"`
+	}
+
+	day := civil.Date{Year: 2026, Month: time.March, Day: 20}
+
+	for _, tc := range []struct {
+		name string
+		opts json.Options
+		want string
+	}{
+		{"every date", json.JoinOptions(
+			json.WithMarshalers(json.MarshalToFunc(jsonutil.DateMarshalBasic)),
+			json.WithUnmarshalers(json.UnmarshalFromFunc(jsonutil.DateUnmarshalBasic)),
+		), `{"day":"20260320","next":"20260320"}`},
+		{"one member", json.JoinOptions(
+			json.WithMarshalers(json.MarshalToFunc(jsonutil.DateMarshalBasicFor("day"))),
+			json.WithUnmarshalers(json.UnmarshalFromFunc(jsonutil.DateUnmarshalBasicFor("day"))),
+		), `{"day":"20260320","next":"2026-03-20"}`},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			t.Parallel()
+
+			b, err := json.Marshal(event{Day: day, Next: day}, tc.opts)
+			if err != nil {
+				t.Fatal(err)
+			}
+
+			if string(b) != tc.want {
+				t.Fatalf("got %s, want %s", b, tc.want)
+			}
+
+			var out event
+			if err := json.Unmarshal(b, &out, tc.opts); err != nil {
+				t.Fatal(err)
+			}
+
+			if out.Day != day || out.Next != day {
+				t.Errorf("got %+v, want both %s", out, day)
+			}
+		})
+	}
+
+	var d civil.Date
+	if err := json.Unmarshal([]byte(`"2026-03-20"`), &d, json.WithUnmarshalers(json.UnmarshalFromFunc(jsonutil.DateUnmarshalBasic))); err == nil {
+		t.Error("a date with separators: got no error")
+	}
+}
