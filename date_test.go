@@ -182,6 +182,24 @@ func TestDateBasic(t *testing.T) {
 		}
 	}
 
+	opts := json.JoinOptions(
+		json.WithMarshalers(json.MarshalToFunc(jsonutil.DateMarshalBasic)),
+		json.WithUnmarshalers(json.UnmarshalFromFunc(jsonutil.DateUnmarshalBasic)),
+	)
+
+	out := event{Day: day}
+	if err := json.Unmarshal([]byte(`{"day":null}`), &out, opts); err != nil {
+		t.Fatal(err)
+	} else if !out.Day.IsZero() {
+		t.Errorf("null: got %s, want the zero date", out.Day)
+	}
+
+	if b, err := json.Marshal(event{}, opts); err != nil {
+		t.Fatal(err)
+	} else if want := `{"day":null,"next":null}`; string(b) != want {
+		t.Errorf("the zero date: got %s, want %s", b, want)
+	}
+
 	if _, err := json.Marshal(civil.Date{Year: 12026, Month: 1, Day: 1}, json.WithMarshalers(json.MarshalToFunc(jsonutil.DateMarshalBasic))); err == nil {
 		t.Error("a year of five digits: got no error")
 	}
