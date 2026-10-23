@@ -31,6 +31,8 @@ This package is particularly useful when you need to handle JSON encoding and de
     that do as `TimeMarshalIntUnix` and `TimeUnmarshalIntUnix` do, but only for the times held by an object member of
     one of the names given, or by an array such a member holds. Any other time is left to the next (un)marshaler, or to
     the default string: for an API that writes some times as unix time and others as strings.
+  * `TimeUnmarshalEmptyAsZero` unmarshals `time.Time` from an empty string as the zero time, and from anything else
+    as `time.Time` itself does.
 * Custom marshalers and unmarshalers for `civil.Date`:
   * `DateMarshalIntUnix` marshals `civil.Date` as an integer representing the unix time of its midnight UTC.
   * `DateUnmarshalIntUnix` unmarshals `civil.Date` from such an integer, reading the day in UTC.
@@ -42,6 +44,8 @@ This package is particularly useful when you need to handle JSON encoding and de
     `DateMarshalBasic` writes as null.
   * `DateMarshalBasicFor(names...)` and `DateUnmarshalBasicFor(names...)` do as the two above, but only for the dates
     held by an object member of one of the names given.
+  * `DateUnmarshalEmptyAsZero` unmarshals `civil.Date` from an empty string as the zero date, and from anything else
+    as `civil.Date` itself does.
 * Custom unmarshaler for `float64`:
   * `Float64UnmarshalStringOrNumber` unmarshals `float64` from a number or from a string holding one, such as `"9.5"`:
     for an API that sends numbers as strings, but for the odd number. Null leaves the value as it is. With a field's

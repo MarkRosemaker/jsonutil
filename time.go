@@ -116,3 +116,25 @@ func timeUnmarshalStringOrIntUnix(layouts []string) func(dec *jsontext.Decoder, 
 		return nil
 	}
 }
+
+// TimeUnmarshalEmptyAsZero is a custom unmarshaler for time.Time that reads an empty string as the zero time, as an
+// API that leaves a time out may send, and anything else as time.Time itself does.
+func TimeUnmarshalEmptyAsZero(dec *jsontext.Decoder, t *time.Time) error {
+	return unmarshalEmptyAsZero(dec, t)
+}
+
+// unmarshalEmptyAsZero reads an empty string as v's zero value, and anything else as v's own type does.
+func unmarshalEmptyAsZero[T any](dec *jsontext.Decoder, v *T) error {
+	val, err := dec.ReadValue()
+	if err != nil {
+		return err
+	}
+
+	if string(val) == `""` {
+		*v = *new(T)
+
+		return nil
+	}
+
+	return json.Unmarshal(val, v)
+}

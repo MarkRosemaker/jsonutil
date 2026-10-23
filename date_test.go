@@ -204,3 +204,44 @@ func TestDateBasic(t *testing.T) {
 		t.Error("a year of five digits: got no error")
 	}
 }
+
+func TestUnmarshalEmptyAsZero(t *testing.T) {
+	t.Parallel()
+
+	type event struct {
+		Day civil.Date `json:"day"`
+		At  time.Time  `json:"at"`
+	}
+
+	opts := json.WithUnmarshalers(json.JoinUnmarshalers(
+		json.UnmarshalFromFunc(jsonutil.DateUnmarshalEmptyAsZero),
+		json.UnmarshalFromFunc(jsonutil.TimeUnmarshalEmptyAsZero),
+	))
+
+	// a value already set shows that the empty string resets it
+	out := event{Day: civil.Date{Year: 1, Month: 1, Day: 1}, At: time.Unix(1, 0)}
+	if err := json.Unmarshal([]byte(`{"day":"","at":""}`), &out, opts); err != nil {
+		t.Fatal(err)
+	}
+
+	if !out.Day.IsZero() || !out.At.IsZero() {
+		t.Errorf("got %+v, want the zero date and time", out)
+	}
+
+	if err := json.Unmarshal([]byte(`{"day":"1999-10-15","at":"1999-10-15T10:00:00Z"}`), &out, opts); err != nil {
+		t.Fatal(err)
+	}
+
+	if want := (event{
+		Day: civil.Date{Year: 1999, Month: time.October, Day: 15},
+		At:  time.Date(1999, time.October, 15, 10, 0, 0, 0, time.UTC),
+	}); out.Day != want.Day || !out.At.Equal(want.At) {
+		t.Errorf("got %+v, want %+v", out, want)
+	}
+
+	for _, in := range []string{`{"day":"1999"}`, `{"at":"1999-10-15"}`} {
+		if err := json.Unmarshal([]byte(in), &out, opts); err == nil {
+			t.Errorf("%s: got no error", in)
+		}
+	}
+}
