@@ -161,6 +161,7 @@ func TestStringOrUnixTime(t *testing.T) {
 		want testTime
 	}{
 		{`{"time":0,"timePointer":null}`, testTime{}},
+		{`{"time":""}`, testTime{}},
 		{
 			fmt.Sprintf(`{"time":%[1]d,"timePointer":%[1]d,"timeOmitZero":%[1]d,"timePointerOmitEmpty":%[1]d}`, nowUnix),
 			testTime{Time: now, TimePointer: &now, TimeOmitZero: now, TimePointerOmitEmpty: &now},

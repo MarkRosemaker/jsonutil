@@ -10,7 +10,8 @@
   * `TimeMarshalIntUnix` marshals `time.Time` as an integer representing unix time.
   * `TimeUnmarshalIntUnix` unmarshals `time.Time` from an integer assuming it represents unix time.
   * `TimeUnmarshalStringOrIntUnix` unmarshals `time.Time` from an RFC 3339 string, or a string such as
-    `"Mon Jan 2 2006 15:04:05 MST-0700"`, or an integer representing unix time. Null is the zero time.
+    `"Mon Jan 2 2006 15:04:05 MST-0700"`, or an integer representing unix time. Null and the empty string are the
+    zero time.
   * `TimeMarshalIntUnixFor(names...)` and `TimeUnmarshalIntUnixFor(names...)` return a marshaler and an unmarshaler
     that do as `TimeMarshalIntUnix` and `TimeUnmarshalIntUnix` do, but only for the times held by an object member of
     one of the names given, or by an array such a member holds. Any other time is left to the next (un)marshaler, or to
