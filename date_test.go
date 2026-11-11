@@ -245,3 +245,41 @@ func TestUnmarshalEmptyAsZero(t *testing.T) {
 		}
 	}
 }
+
+func TestDateMarshalZeroAsNull(t *testing.T) {
+	type dates struct {
+		Date        civil.Date   `json:"date"`
+		Pointer     *civil.Date  `json:"pointer"`
+		OmitZero    civil.Date   `json:"omitZero,omitzero"`
+		Basic       civil.Date   `json:"basic"`
+		BasicZero   civil.Date   `json:"basicZero"`
+		InSliceZero []civil.Date `json:"inSlice"`
+	}
+
+	jsonOpts := json.WithMarshalers(json.JoinMarshalers(
+		json.MarshalToFunc(jsonutil.DateMarshalBasicFor("basic")),
+		json.MarshalToFunc(jsonutil.DateMarshalZeroAsNull),
+	))
+
+	day := civil.Date{Year: 2026, Month: 11, Day: 11}
+	in := dates{Pointer: &civil.Date{}, Basic: day, InSliceZero: []civil.Date{{}, day}}
+
+	b, err := json.Marshal(in, jsonOpts)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	want := `{"date":null,"pointer":null,"basic":"20261111","basicZero":null,"inSlice":[null,"2026-11-11"]}`
+	if string(b) != want {
+		t.Fatalf("got  %s\nwant %s", b, want)
+	}
+
+	var out dates
+	if err := json.Unmarshal(b, &out, json.WithUnmarshalers(json.UnmarshalFromFunc(jsonutil.DateUnmarshalBasicFor("basic")))); err != nil {
+		t.Fatal(err)
+	}
+
+	if !out.Date.IsZero() || out.Pointer != nil || out.Basic != day || !out.InSliceZero[0].IsZero() {
+		t.Fatalf("read back as %+v", out)
+	}
+}
