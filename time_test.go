@@ -155,6 +155,7 @@ func TestStringOrUnixTime(t *testing.T) {
 
 	now := time.Now().Truncate(time.Second)
 	nowUnix := now.Unix()
+	milli := now.Add(123 * time.Millisecond)
 
 	for i, tc := range []struct {
 		in   string
@@ -166,6 +167,12 @@ func TestStringOrUnixTime(t *testing.T) {
 			fmt.Sprintf(`{"time":%[1]d,"timePointer":%[1]d,"timeOmitZero":%[1]d,"timePointerOmitEmpty":%[1]d}`, nowUnix),
 			testTime{Time: now, TimePointer: &now, TimeOmitZero: now, TimePointerOmitEmpty: &now},
 		},
+		{
+			fmt.Sprintf(`{"time":%[1]d,"timePointer":%[1]d,"timeOmitZero":%[1]d,"timePointerOmitEmpty":%[1]d}`, milli.UnixMilli()),
+			testTime{Time: milli, TimePointer: &milli, TimeOmitZero: milli, TimePointerOmitEmpty: &milli},
+		},
+		{`{"time":1485487350827}`, testTime{Time: time.Date(2017, 1, 27, 3, 22, 30, 827e6, time.UTC)}},
+		{`{"time":99999999999}`, testTime{Time: time.Unix(99999999999, 0)}},
 		{
 			fmt.Sprintf(`{"time":%[1]q,"timePointer":%[1]q,"timeOmitZero":%[1]q,"timePointerOmitEmpty":%[1]q}`, now.Format(time.RFC3339)),
 			testTime{Time: now, TimePointer: &now, TimeOmitZero: now, TimePointerOmitEmpty: &now},
