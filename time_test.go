@@ -220,3 +220,59 @@ func TestStringOrUnixTime(t *testing.T) {
 		}
 	})
 }
+
+// A time is written and read as unix milliseconds, to the millisecond, and the zero time as 0; by member name, beside
+// times in unix seconds and in the type's own form.
+func TestUnixMilliTime(t *testing.T) {
+	t.Parallel()
+
+	type trade struct {
+		At       time.Time   `json:"at"`
+		Read     time.Time   `json:"read"`
+		Created  time.Time   `json:"created"`
+		Ticks    []time.Time `json:"ticks"`
+		Settled  time.Time   `json:"settled"`
+		Reported time.Time   `json:"reported"`
+	}
+
+	ms, secs := []string{"at", "ticks", "settled"}, []string{"read"}
+	opts := json.JoinOptions(
+		json.WithMarshalers(json.JoinMarshalers(
+			json.MarshalToFunc(jsonutil.TimeMarshalIntUnixMilliFor(ms...)),
+			json.MarshalToFunc(jsonutil.TimeMarshalIntUnixFor(secs...)),
+		)),
+		json.WithUnmarshalers(json.JoinUnmarshalers(
+			json.UnmarshalFromFunc(jsonutil.TimeUnmarshalIntUnixMilliFor(ms...)),
+			json.UnmarshalFromFunc(jsonutil.TimeUnmarshalIntUnixFor(secs...)),
+		)),
+	)
+
+	at := time.UnixMilli(1795464914123).UTC()
+	in := trade{At: at, Read: at.Truncate(time.Second), Created: at, Ticks: []time.Time{at}, Reported: at}
+
+	b, err := json.Marshal(in, opts)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	want := `{"at":1795464914123,"read":1795464914,"created":"2026-11-23T20:15:14.123Z","ticks":[1795464914123],` +
+		`"settled":0,"reported":"2026-11-23T20:15:14.123Z"}`
+	if string(b) != want {
+		t.Fatalf("got %s, want %s", b, want)
+	}
+
+	var out trade
+	if err := json.Unmarshal(b, &out, opts); err != nil {
+		t.Fatal(err)
+	}
+
+	if !out.At.Equal(at) || !out.Ticks[0].Equal(at) || !out.Read.Equal(in.Read) || !out.Settled.IsZero() {
+		t.Errorf("got %+v, want %+v", out, in)
+	}
+
+	// without names, every time is unix milliseconds
+	var plain time.Time
+	if err := json.Unmarshal([]byte(`1795464914123`), &plain, json.WithUnmarshalers(json.UnmarshalFromFunc(jsonutil.TimeUnmarshalIntUnixMilli))); err != nil || !plain.Equal(at) {
+		t.Errorf("got %v (%v), want %v", plain, err, at)
+	}
+}
