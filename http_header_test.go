@@ -59,6 +59,23 @@ func TestHTTPHeader(t *testing.T) {
 		}
 	})
 
+	// Other tools record a header's values as a list.
+	t.Run("a list of values", func(t *testing.T) {
+		out := http.Header{}
+		if err := json.Unmarshal([]byte(`{"Content-Type":["text/xml;charset=UTF-8"],"Vary":["Accept","Origin"]}`), &out, jsonOpts); err != nil {
+			t.Fatal(err)
+		}
+
+		want := http.Header{"Content-Type": {"text/xml;charset=UTF-8"}, "Vary": {"Accept", "Origin"}}
+		if !maps.EqualFunc(want, out, slices.Equal) {
+			t.Fatalf("want: %v, got: %v", want, out)
+		}
+
+		if err := json.Unmarshal([]byte(`{"Vary":["Accept",3]}`), &out, jsonOpts); err == nil {
+			t.Fatal("a list holding a number was read")
+		}
+	})
+
 	for i, tc := range []struct {
 		in  http.Header
 		out string
